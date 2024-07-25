@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+
+        const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var player;
+    var cursors;
+    const playerSpriteSheetPath = 'assets/Down.png';
+    var animationPlaying = false;
+    const game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('ground', 'assets/ground.jpg');
+        this.load.spritesheet('man', playerSpriteSheetPath, { frameWidth: 24, frameHeight: 25.5 });
+    }
+
+    function create ()
+    {
+        this.add.image(640, 480, 'ground');
+
+            // Create the player sprite and set physics properties
+            player = this.physics.add.sprite(300, 0, 'man');
+            player.setScale(2);
+
+            // Define the animation for walking downward using x, y coordinates
+            this.anims.create({
+                key: 'down_walk',
+                frames: [
+                    { key: 'man', frame: 8 },
+                    { key: 'man', frame: 9 },
+                    { key: 'man', frame: 10 },
+                    { key: 'man', frame: 11 }
+                ],
+                frameRate: 20, // 프레임 속도를 높여 빠르게 애니메이션 재생
+                repeat: 0 // 애니메이션을 한 번만 재생
+            });
+
+            // Enable keyboard input
+            cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    function update ()
+    {
+          // 아래 키가 눌렸고 애니메이션이 재생 중이 아닐 때
+            if (cursors.down.isDown && !animationPlaying)
+            {
+                animationPlaying = true;
+                player.setVelocityY(100);
+                player.anims.play('down_walk', true);
+
+                // 애니메이션 완료 시 플래그 초기화
+                player.on('animationcomplete', function() {
+                    animationPlaying = false;
+                    player.setVelocityY(0);
+                }, this);
+            }
+    }
+    </script>
+
+</body>
+</html>
