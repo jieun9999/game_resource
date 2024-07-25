@@ -12,51 +12,94 @@
     <script type="text/javascript">
 
         const config = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        physics: {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: {
                 default: 'arcade',
                 arcade: {
                     gravity: { y: 0 },
                     debug: false
                 }
             },
-        scene: {
-            preload: preload,
-            create: create,
-            update: update
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        var player;
+        var cursors;
+        const downSheet = 'assets/Down.png';
+        const upSheet = 'assets/Up.png';
+        const leftSheet = 'assets/Left.png';
+        const rightSheet = 'assets/Right.png';
+
+        var animationPlaying = false;
+        const game = new Phaser.Game(config);
+
+        function preload ()
+        {
+            this.load.image('ground', 'assets/ground.jpg');
+            this.load.spritesheet('downSheet', downSheet, { frameWidth: 24, frameHeight: 25.5 });
+            this.load.spritesheet('upSheet', upSheet, { frameWidth: 24, frameHeight: 25.5 });
+            this.load.spritesheet('leftSheet', leftSheet, { frameWidth: 24, frameHeight: 25.5 });
+            this.load.spritesheet('rightSheet', rightSheet, { frameWidth: 24, frameHeight: 25.5 });
         }
-    };
 
-    var player;
-    var cursors;
-    const playerSpriteSheetPath = 'assets/Down.png';
-    var animationPlaying = false;
-    const game = new Phaser.Game(config);
-
-    function preload ()
-    {
-        this.load.image('ground', 'assets/ground.jpg');
-        this.load.spritesheet('man', playerSpriteSheetPath, { frameWidth: 24, frameHeight: 25.5 });
-    }
-
-    function create ()
-    {
-        this.add.image(640, 480, 'ground');
+        function create ()
+        {
+            this.add.image(400, 300, 'ground'); // 이미지 위치를 가운데로 수정
 
             // Create the player sprite and set physics properties
-            player = this.physics.add.sprite(300, 0, 'man');
+            player = this.physics.add.sprite(150, 150, 'downSheet');
             player.setScale(2);
 
             // Define the animation for walking downward using x, y coordinates
             this.anims.create({
-                key: 'down_walk',
+                key: 'downWalk',
                 frames: [
-                    { key: 'man', frame: 8 },
-                    { key: 'man', frame: 9 },
-                    { key: 'man', frame: 10 },
-                    { key: 'man', frame: 11 }
+                    { key: 'downSheet', frame: 8 },
+                    { key: 'downSheet', frame: 9 },
+                    { key: 'downSheet', frame: 10 },
+                    { key: 'downSheet', frame: 11 }
+                ],
+                frameRate: 20, // 프레임 속도를 높여 빠르게 애니메이션 재생
+                repeat: 0 // 애니메이션을 한 번만 재생
+            });
+
+            this.anims.create({
+                key: 'upWalk',
+                frames: [
+                    { key: 'upSheet', frame: 8 },
+                    { key: 'upSheet', frame: 9 },
+                    { key: 'upSheet', frame: 10 },
+                    { key: 'upSheet', frame: 11 }
+                ],
+                frameRate: 20, // 프레임 속도를 높여 빠르게 애니메이션 재생
+                repeat: 0 // 애니메이션을 한 번만 재생
+            });
+
+            this.anims.create({
+                key: 'leftWalk',
+                frames: [
+                    { key: 'leftSheet', frame: 8 },
+                    { key: 'leftSheet', frame: 9 },
+                    { key: 'leftSheet', frame: 10 },
+                    { key: 'leftSheet', frame: 11 }
+                ],
+                frameRate: 20, // 프레임 속도를 높여 빠르게 애니메이션 재생
+                repeat: 0 // 애니메이션을 한 번만 재생
+            });
+
+            this.anims.create({
+                key: 'rightWalk',
+                frames: [
+                    { key: 'rightSheet', frame: 8 },
+                    { key: 'rightSheet', frame: 9 },
+                    { key: 'rightSheet', frame: 10 },
+                    { key: 'rightSheet', frame: 11 }
                 ],
                 frameRate: 20, // 프레임 속도를 높여 빠르게 애니메이션 재생
                 repeat: 0 // 애니메이션을 한 번만 재생
@@ -64,25 +107,38 @@
 
             // Enable keyboard input
             cursors = this.input.keyboard.createCursorKeys();
-    }
+        }
 
-    function update ()
-    {
-          // 아래 키가 눌렸고 애니메이션이 재생 중이 아닐 때
-            if (cursors.down.isDown && !animationPlaying)
-            {
-                animationPlaying = true;
-                player.setVelocityY(100);
-                player.anims.play('down_walk', true);
+        function playAnimation(velocityX, velocityY, animationKey) {
+            animationPlaying = true;
+            player.setVelocity(velocityX, velocityY);
+            player.anims.play(animationKey, true);
 
-                // 애니메이션 완료 시 플래그 초기화
-                player.on('animationcomplete', function() {
-                    animationPlaying = false;
-                    player.setVelocityY(0);
-                }, this);
+            // 애니메이션 완료 시 플래그 초기화
+            player.on('animationcomplete', function() {
+                animationPlaying = false;
+                player.setVelocity(0);
+            }, this);
+        }
+
+        function update ()
+        {
+            if (cursors.down.isDown && !animationPlaying) {
+                playAnimation(0, 100, 'downWalk');
             }
-    }
-    </script>
 
+            if (cursors.up.isDown && !animationPlaying) {
+                playAnimation(0, -100, 'upWalk');
+            }
+
+            if (cursors.left.isDown && !animationPlaying) {
+                playAnimation(-100, 0, 'leftWalk');
+            }
+
+            if (cursors.right.isDown && !animationPlaying) {
+                playAnimation(100, 0, 'rightWalk');
+            }
+        }
+    </script>
 </body>
 </html>
